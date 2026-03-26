@@ -1,4 +1,5 @@
-﻿namespace Catalog.Api.Catalog.Producrs.CreateProduct
+﻿
+namespace Catalog.Api.Catalog.Producrs.CreateProduct
 {
     public record CreateProductCommand(
         string Name, List<string> Category, string Description, string ImageFile, decimal Price
@@ -6,7 +7,7 @@
 
     public record CreateProductResult(Guid Id);
 
-    internal class CreateProductCommandHandler 
+    internal class CreateProductCommandHandler(IDocumentSession session)
         : ICommandHandler<CreateProductCommand, CreateProductResult>
     {
         public async Task<CreateProductResult> Handle(CreateProductCommand command, CancellationToken cancellationToken)
@@ -20,6 +21,8 @@
                 Price = command.Price
             };
             // Here you would typically save the product to a database
+            session.Store(product);
+            await session.SaveChangesAsync(cancellationToken);
             // For this example, we'll just return the created product's ID
             return new CreateProductResult(Guid.NewGuid());
         }
